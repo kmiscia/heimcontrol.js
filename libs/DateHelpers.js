@@ -8,10 +8,6 @@ define([ './date_format_helpers.js' ], function() {
     this.now = new Date();
   }
 
-  DateHelpers.prototype.today = function() {
-    return this.now;
-  }
-
   DateHelpers.prototype.currentMonth = function() {
     return this.now.format("mm").toLowerCase();
   }
@@ -29,6 +25,8 @@ define([ './date_format_helpers.js' ], function() {
   }
 
   DateHelpers.prototype.applyOffset = function(date, minutes) {
+    winston.info("date = " + date);
+    winston.info("minutes = " + minutes);
     return new Date(date.getTime() + minutes * 60000);
   }
 

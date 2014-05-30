@@ -2,6 +2,11 @@ if (typeof define !== 'function') {
   var define = require('amdefine')(module);
 }
 
+var winston = require('winston');
+winston.add(winston.transports.File, { 
+  filename: '/home/pi/heimcontrol.js/logs/sunrise_sunset.log' 
+});
+
 define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, DateFormatHelpers) {
   
   var SunriseSunsetHelpers = function(app) {
@@ -27,8 +32,12 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
 
   SunriseSunsetHelpers.prototype.doAction = function(arduino, actionTime){  
 
+    winston.info("...calculated action time = " + actionTime)
+
     if(this.dateHelper.is(actionTime)){
       
+      winston.info("...which is NOW!");
+
       var actionValue = this.isSunset() ? this.sunriseValue : this.sunsetValue;
       var staticArduino = new Arduino(app);
       
@@ -37,13 +46,17 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
         value: actionValue
       });
     }
+    else
+      winston.info("...which is not now :(");
   }
 
   SunriseSunsetHelpers.prototype.eachArduino = function(actionKey, callback){ 
     this.app.get('db').collection('Arduino').find(this.arduinoParams(actionKey), function(error, arduinos){
       arduinos.each(function(err, arduino){
-        if(arduino && eval("arduino." + actionKey) && eval("arduino." + actionKey).length)
+        if(arduino && eval("arduino." + actionKey) && eval("arduino." + actionKey).length){
+          winston.info("Found an arduino with desc = '" + arduino.description + "' and " + actionKey + " = " + eval("arduino." + actionKey))
           callback(arduino);
+        }
       });
     });
   }
@@ -66,6 +79,8 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
       var action = actions[i];
       var actionKey = action + "Offset"
 
+      winston.info(" >>> Processing " + action);
+
       callback(action, actionKey);
     }
   }
@@ -76,6 +91,10 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
     this.key = key;
 
     that.currentMonthsDays(function(error, data){
+
+      winston.info("--------------")
+      winston.info("Sunrise today = " + that.dateHelper.sunrise(data.days));
+      winston.info("Sunset today = " + that.dateHelper.sunset(data.days));
 
       that.eachAction(function(action, actionKey){
       

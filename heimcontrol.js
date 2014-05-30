@@ -177,7 +177,7 @@ requirejs([ 'http', 'connect', 'mongodb', 'path', 'express', 'node-conf', 'socke
       setInterval(function(){
         var sunriseSunsetHelper = new SunriseSunsetHelpers(app);
         sunriseSunsetHelper.check();
-      }, 1000 * 60);
+      }, 2000);
     }
   });
 });
