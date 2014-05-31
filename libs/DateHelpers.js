@@ -34,16 +34,23 @@ define([ './date_format_helpers.js' ], function() {
   }
 
   DateHelpers.prototype.is = function(date) {
-    return date == this.now;
+    
+    var dateComparison = new Date(date.getTime());
+    dateComparison.setSeconds(0, 0);
+
+    var now = new Date(this.now.getTime());
+    now.setSeconds(0, 0);
+
+    return dateComparison.getTime() == now.getTime();
   }  
 
   DateHelpers.prototype.sunrise = function(days){
     var sunrise = new Date(
-      parseInt(this.currentYear()),
-      parseInt(this.currentMonth()),
-      parseInt(this.currentDay()),
-      parseInt(days[this.currentDay()].sunrise.substring(0, 2)),
-      parseInt(days[this.currentDay()].sunrise.substring(2, 4))
+      this.currentYear(),
+      parseInt(this.currentMonth()) - 1,
+      this.currentDay(),
+      days[this.currentDay()].sunrise.substring(0, 2),
+      days[this.currentDay()].sunrise.substring(2, 4)
     );
     
     if(sunrise.dst()){
@@ -56,7 +63,7 @@ define([ './date_format_helpers.js' ], function() {
   DateHelpers.prototype.sunset = function(days){
     var sunset = new Date(
       this.currentYear(),
-      this.currentMonth(),
+      (parseInt(this.currentMonth()) - 1),
       this.currentDay(),
       days[this.currentDay()].sunset.substring(0, 2),
       days[this.currentDay()].sunset.substring(2, 4),

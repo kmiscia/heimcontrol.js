@@ -95,10 +95,18 @@ requirejs([ 'http', 'connect', 'mongodb', 'path', 'express', 'node-conf', 'socke
         });
       });
 
+
+
       var sunriseSunsetLogger = require('winston');
       sunriseSunsetLogger.add(sunriseSunsetLogger.transports.File, { 
-        filename: '/home/pi/heimcontrol.js/logs/sunrise_sunset.log' 
+        filename: '/home/pi/heimcontrol.js/logs/sunrise_sunset.log',
+        json: false,
+        colorize: true,
+        handleExceptions: true
       });
+      sunriseSunsetLogger.handleExceptions(new sunriseSunsetLogger.transports.File({ 
+        filename: '/home/pi/heimcontrol.js/logs/sunrise_sunset_exceptions.log' 
+      }));
 
       // Express
       app.configure(function() {
@@ -183,7 +191,7 @@ requirejs([ 'http', 'connect', 'mongodb', 'path', 'express', 'node-conf', 'socke
       setInterval(function(){
         var sunriseSunsetHelper = new SunriseSunsetHelpers(app);
         sunriseSunsetHelper.check();
-      }, 1000 * 60);
+      }, 30000);
     }
   });
 });

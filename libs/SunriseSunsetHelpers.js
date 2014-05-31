@@ -2,7 +2,7 @@ if (typeof define !== 'function') {
   var define = require('amdefine')(module);
 }
 
-define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, DateFormatHelpers) {
+define([ './DateHelpers.js', './DateFormatHelpers.js', '../plugins/arduino/index.js' ], function(DateHelpers, DateFormatHelpers, Arduino) {
   
   var SunriseSunsetHelpers = function(app) {
     this.app = app;
@@ -12,38 +12,42 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
     this.sunsetValue = 1;
   }
 
-  SunriseSunsetHelpers.prototype.isSunrise = function(){
-    return this.isSunrise();
+  SunriseSunsetHelpers.prototype.isSunrise = function(actionKey){
+    return actionKey.match("sunrise") !== null ;
   }  
 
-  SunriseSunsetHelpers.prototype.isSunset = function(){
-    return !this.isSunrise()
+  SunriseSunsetHelpers.prototype.isSunset = function(actionKey){
+    return !this.isSunrise(actionKey)
   }
   
+  SunriseSunsetHelpers.prototype.actionValue = function(actionKey){
+    return this.isSunset(actionKey) ? this.sunsetValue : this.sunriseValue;
+  }
+
   SunriseSunsetHelpers.prototype.arduinoParams = function(actionKey){  
     arduinoParams = {};
     arduinoParams[actionKey] = { $exists: true };
     return arduinoParams;
   }
 
-  SunriseSunsetHelpers.prototype.doAction = function(arduino, actionTime){  
+  SunriseSunsetHelpers.prototype.doAction = function(arduino, actionTime, actionKey){  
 
-    this.sunriseSunsetLogger.info("...calculated action time = " + actionTime)
+    this.sunriseSunsetLogger.info("         ...calculated action time = " + actionTime)
 
     if(this.dateHelper.is(actionTime)){
       
-      this.sunriseSunsetLogger.info("...which is NOW!");
+      this.sunriseSunsetLogger.info("         ...which is NOW!");
 
-      var actionValue = this.isSunset() ? this.sunriseValue : this.sunsetValue;
-      var staticArduino = new Arduino(app);
-      
-      staticArduino.rcswitch({
+      var data = {
         id: arduino._id, 
-        value: actionValue
-      });
+        value: this.actionValue(actionKey)
+      }
+
+      var staticArduino = new Arduino(this.app);
+      staticArduino.rcswitch(data);
     }
     else
-      this.sunriseSunsetLogger.info("...which is not now :(");
+      this.sunriseSunsetLogger.info("         ...which is not now :(");
   }
 
   SunriseSunsetHelpers.prototype.eachArduino = function(actionKey, callback){ 
@@ -51,7 +55,7 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
     this.app.get('db').collection('Arduino').find(this.arduinoParams(actionKey), function(error, arduinos){
       arduinos.each(function(err, arduino){
         if(arduino && eval("arduino." + actionKey) && eval("arduino." + actionKey).length){
-          that.sunriseSunsetLogger.info("Found an arduino with desc = '" + arduino.description + "' and " + actionKey + " = " + eval("arduino." + actionKey))
+          that.sunriseSunsetLogger.info(" >>>>>> Found '" + arduino.description + "' and " + actionKey + " = " + eval("arduino." + actionKey))
           callback(arduino);
         }
       });
@@ -96,6 +100,7 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
       that.sunriseSunsetLogger.info("--------------")
       that.sunriseSunsetLogger.info("Sunrise today = " + that.dateHelper.sunrise(data.days));
       that.sunriseSunsetLogger.info("Sunset today = " + that.dateHelper.sunset(data.days));
+      that.sunriseSunsetLogger.info("Now = " + that.dateHelper.today());
 
       that.eachAction(function(action, actionKey){
       
@@ -106,7 +111,7 @@ define([ './DateHelpers.js', './DateFormatHelpers.js' ], function(DateHelpers, D
             that.offset(arduino, actionKey)
           );
 
-          that.doAction(arduino, actionTime);
+          that.doAction(arduino, actionTime, actionKey);
         });
       });
     });
