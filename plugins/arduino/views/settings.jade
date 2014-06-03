@@ -38,11 +38,11 @@ div.container
               
                 div.rcswitch(class=(item.method != 'rcswitch' ? 'hidden' : ''))
                   label(for="sunriseOffset") Sunrise Offset:
-                  input.uppercase(type="text", name="data[#{i}][sunriseOffset]", placeholder="0", data-required="0", maxlength="3", value=(item.sunriseOffset ? item.sunriseOffset : ''), pattern="^[0-9]{0,3}$")
+                  input.uppercase(type="text", name="data[#{i}][sunriseOffset]", placeholder="0", data-required="0", maxlength="3", value=(item.sunriseOffset ? item.sunriseOffset : ''), pattern="^[-]?[0-9]{0,3}$")
 
                 div.rcswitch(class=(item.method != 'rcswitch' ? 'hidden' : ''))
                   label(for="sunsetOffset") Sunset Offset:
-                  input.uppercase(type="text", name="data[#{i}][sunsetOffset]", placeholder="0", data-required="0", maxlength="3", value=(item.sunsetOffset ? item.sunsetOffset : ''), pattern="^[0-9]{0,3}$")
+                  input.uppercase(type="text", name="data[#{i}][sunsetOffset]", placeholder="0", data-required="0", maxlength="3", value=(item.sunsetOffset ? item.sunsetOffset : ''), pattern="^[-]?[0-9]{0,3}$")
 
                 div.sensor(class=(item.method != 'sensor' ? 'hidden' : ''))
                   label(for="formula") Formula
