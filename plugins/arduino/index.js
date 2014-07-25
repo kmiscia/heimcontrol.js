@@ -76,6 +76,10 @@ define([ 'duino' ], function(duino) {
         item.value = (parseInt(data.value));
         that.values[item._id] = item.value;
 
+        // Save the value in case the app restarts and we lose state
+        var arduinos = that.app.get('db').collection('Arduino');
+        arduinos.update({"_id": item._id}, {$set: {"state": item.value}}, {upsert: true}, function(err,data){});
+
         // Create RC object
         if (!that.pins[item.pin]) {
           that.pins[item.pin] = new duino.RC({
