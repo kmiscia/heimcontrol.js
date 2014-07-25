@@ -25,6 +25,13 @@ requirejs([ 'http', 'connect', 'mongodb', 'path', 'express', 'node-conf', 'socke
   var node_env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
   var config = Conf.load(node_env);
 
+  // catch the uncaught errors that weren't wrapped in a domain or try catch statement
+  // do not use this in modules, but only in applications, as otherwise we could have multiple of these bound
+  process.on('uncaughtException', function(err) {
+    // handle the error safely
+    console.log(err);
+  });
+
   if (!config.port || !config.secret || !config.mongo || !config.mongo.name || !config.mongo.host || !config.mongo.port || !config.mongo.user) {
     return console.log('\u001b[31mMissing configuration file \u001b[33mconfig/' + node_env + '.json\u001b[31m. Create configuration file or start with `NODE_ENV=development node heimcontrol.js` to use another configuration file.\033[0m');
   }
